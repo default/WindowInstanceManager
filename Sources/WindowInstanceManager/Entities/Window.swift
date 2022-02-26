@@ -5,14 +5,7 @@
 
 import UIKit
 
-protocol WindowDelegate: AnyObject {
-    func close(window: Window)
-}
-
 final class Window {
-    // MARK: Delegate
-    weak var delegate: WindowDelegate?
-    
     // MARK: Properties
     let id = UUID()
     
@@ -32,12 +25,5 @@ final class Window {
         
         uiWindow = UIWindow(frame: UIScreen.main.bounds)
         uiWindow!.rootViewController = rootController
-    }
-}
-
-// MARK: - WindowControlInterface
-extension Window: WindowControlInterface {
-    func close() {
-        delegate?.close(window: self)
     }
 }

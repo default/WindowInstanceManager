@@ -1,12 +1,14 @@
 import UIKit
 
-public protocol WindowControlInterface {
-    var uiWindow: UIWindow? { get }
-    func close()
+public struct ManagedWindowReference {
+    let id: UUID
 }
 
 public protocol WindowInstanceManaging {
-    func presentNew(withRoot controller: UIViewController) -> WindowControlInterface
+    func instance(withRoot controller: UIViewController) -> ManagedWindowReference
+    
+    func makeKey(_ windowReference: ManagedWindowReference)
+    func resign(_ windowReference: ManagedWindowReference)
 }
 
 public final class WindowInstanceManager {
@@ -35,24 +37,28 @@ public final class WindowInstanceManager {
 
 // MARK: - WindowInstanceManaging
 extension WindowInstanceManager: WindowInstanceManaging {
-    public func presentNew(withRoot controller: UIViewController) -> WindowControlInterface {
+    public func instance(withRoot controller: UIViewController) -> ManagedWindowReference {
         let window = Window(
             application: application,
             rootController: controller
         )
-        
         instances[window.id] = window
-        window.delegate = self
+        
+        return ManagedWindowReference(id: window.id)
+    }
+    
+    public func makeKey(_ windowReference: ManagedWindowReference) {
+        guard let window = instances[windowReference.id] else {
+            return
+        }
         
         window.uiWindow?.makeKeyAndVisible()
-        
-        return window
     }
-}
-
-// MARK: - WindowDelegate
-extension WindowInstanceManager: WindowDelegate {
-    func close(window: Window) {
+    public func resign(_ windowReference: ManagedWindowReference) {
+        guard let window = instances[windowReference.id] else {
+            return
+        }
+        
         guard let uiWindow = window.uiWindow else {
             return
         }
