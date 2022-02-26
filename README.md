@@ -1,3 +1,3 @@
 # WindowInstanceManager
 
-A description of this package.
+`WindowInstanceManager` is an utility wich helps to manage multiple windows for a single app.
