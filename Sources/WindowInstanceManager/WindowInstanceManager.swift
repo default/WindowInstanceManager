@@ -6,9 +6,18 @@ public struct ManagedWindowReference {
 
 public protocol WindowInstanceManaging {
     func instance(withRoot controller: UIViewController) -> ManagedWindowReference
+    func instance(
+        withRoot controller: UIViewController,
+        styleOverride: UIUserInterfaceStyle?
+    ) -> ManagedWindowReference
     
     func makeKey(_ windowReference: ManagedWindowReference)
     func resign(_ windowReference: ManagedWindowReference)
+}
+public extension WindowInstanceManaging {
+    func instance(withRoot controller: UIViewController) -> ManagedWindowReference {
+        instance(withRoot: controller, styleOverride: nil)
+    }
 }
 
 public final class WindowInstanceManager {
@@ -37,11 +46,19 @@ public final class WindowInstanceManager {
 
 // MARK: - WindowInstanceManaging
 extension WindowInstanceManager: WindowInstanceManaging {
-    public func instance(withRoot controller: UIViewController) -> ManagedWindowReference {
+    public func instance(
+        withRoot controller: UIViewController,
+        styleOverride: UIUserInterfaceStyle?
+    ) -> ManagedWindowReference {
         let window = Window(
             application: application,
             rootController: controller
         )
+        
+        if let styleOverride = styleOverride {
+            window.uiWindow?.overrideUserInterfaceStyle = styleOverride
+        }
+        
         instances[window.id] = window
         
         return ManagedWindowReference(id: window.id)
